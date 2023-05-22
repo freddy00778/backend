@@ -30,7 +30,7 @@ jobs:
           name: Deploy Over SSH
           command: |
             ssh ubuntu@15.188.175.214 << EOF
-              cd ~/apps/backend/
+              cd apps/backend/
               git pull
               npm install
               pm2 restart all
