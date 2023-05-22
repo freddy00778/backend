@@ -1,0 +1,54 @@
+version: 2.1
+orbs:
+  node: circleci/node@4.1.0
+workflows:
+  node-tests:
+    jobs:
+      - node/test
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:14
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - run:
+          name: Run Tests
+          command: npm test
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - .
+
+  deploy:
+    machine:
+      enabled: true
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Deploy Over SSH
+          command: |
+            ssh ubuntu@<YOUR_SERVER_IP> << EOF
+              cd <YOUR_PROJECT_DIRECTORY>
+              git pull
+              npm install
+              pm2 restart all
+            EOF
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
