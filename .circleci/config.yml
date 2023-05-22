@@ -34,8 +34,8 @@ jobs:
       - run:
           name: Deploy Over SSH
           command: |
-            ssh ubuntu@<YOUR_SERVER_IP> << EOF
-              cd <YOUR_PROJECT_DIRECTORY>
+            ssh ubuntu@15.188.175.214 << EOF
+              cd ~/apps/backend/
               git pull
               npm install
               pm2 restart all
