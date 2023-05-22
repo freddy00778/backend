@@ -62,12 +62,12 @@ export const getSale =
 export const processPaymentForm =
     catchErrors(async (req, res) => {
 
-        console.log(req.cookies)
-        const csrfToken = req.cookies['XSRF-TOKEN'];
-        const csrfHeader = req.headers['x-xsrf-token'];
-        if (!csrfToken || !csrfHeader || csrfToken !== csrfHeader) {
-            return res.status(403).json({ message: 'Invalid CSRF token' });
-        }
+        // console.log(req.cookies)
+        // const csrfToken = req.cookies['XSRF-TOKEN'];
+        // const csrfHeader = req.headers['x-xsrf-token'];
+        // if (!csrfToken || !csrfHeader || csrfToken !== csrfHeader) {
+        //     return res.status(403).json({ message: 'Invalid CSRF token' });
+        // }
 
         const { items, email, quantity,  } = req.body;
         if (!(email)) {

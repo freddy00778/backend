@@ -87,12 +87,12 @@ exports.getSale = (0, errors_1.catchErrors)((req, res) => __awaiter(void 0, void
     });
 }));
 exports.processPaymentForm = (0, errors_1.catchErrors)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.cookies);
-    const csrfToken = req.cookies['XSRF-TOKEN'];
-    const csrfHeader = req.headers['x-xsrf-token'];
-    if (!csrfToken || !csrfHeader || csrfToken !== csrfHeader) {
-        return res.status(403).json({ message: 'Invalid CSRF token' });
-    }
+    // console.log(req.cookies)
+    // const csrfToken = req.cookies['XSRF-TOKEN'];
+    // const csrfHeader = req.headers['x-xsrf-token'];
+    // if (!csrfToken || !csrfHeader || csrfToken !== csrfHeader) {
+    //     return res.status(403).json({ message: 'Invalid CSRF token' });
+    // }
     const { items, email, quantity, } = req.body;
     if (!(email)) {
         return res.status(400).send("All inputs are required!");
