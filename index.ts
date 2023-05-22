@@ -58,12 +58,13 @@ const initializeExpress = async () => {
     app.use(cors());
     const allowedOrigins = [
         'changeverveacademy.com',
-        'changeverveacademy.com',
         'http://localhost:3000',
         'http://localhost:3001',
         'http://localhost:5001',
         'http://localhost:63342',
         'https://changeverveacademy.com',
+        'http://changeverveacademy.com',
+        'http://store.changeverveacademy.com',
         'https://store.changeverveacademy.com',
         'https://stores.changeverveacademy.com',
         'store.changeverveacademy.com',
