@@ -69,7 +69,7 @@ export const processPaymentForm =
         //     return res.status(403).json({ message: 'Invalid CSRF token' });
         // }
 
-        const { items, email, quantity,  } = req.body;
+        const { email, quantity } = req.body;
         if (!(email)) {
             return res.status(400).send("All inputs are required!");
         }
@@ -88,7 +88,11 @@ export const processPaymentForm =
             total: plan?.price_per_person * Number(plan_qty),
             transaction_number: orderNo,
             url: `/card-payments/${orderNo}`,
-            items
+            items: [
+                {
+                    id: plan?.id,
+                }
+            ]
         }, '72h')
 
         await (await InvoiceHandlers.create(dataProvider)).create({
