@@ -81,7 +81,7 @@ const initializeExpress = () => __awaiter(void 0, void 0, void 0, function* () {
     NodeCron.schedule('0 0 * * *', () => {
         console.log('This task runs every day at 12:00 AM!');
     });
-    // app.use(cors());
+    app.use((0, cors_1.default)());
     const allowedOrigins = [
         'changeverveacademy.com',
         'changeverveacademy.com',

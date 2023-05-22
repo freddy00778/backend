@@ -55,7 +55,7 @@ const initializeExpress = async () => {
         console.log('This task runs every day at 12:00 AM!');
     });
 
-    // app.use(cors());
+    app.use(cors());
     const allowedOrigins = [
         'changeverveacademy.com',
         'changeverveacademy.com',
