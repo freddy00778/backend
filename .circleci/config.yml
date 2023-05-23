@@ -27,6 +27,12 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run:
+          name: Correct Ownership
+          command: |
+            ssh ubuntu@15.188.175.214 \<< EOF
+              sudo chown -R ubuntu:ubuntu apps/backend/
+            EOF
+      - run:
           name: Deploy Over SSH
           command: |
             ssh ubuntu@15.188.175.214 \<< EOF
