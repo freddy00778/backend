@@ -80,7 +80,6 @@ export const processPaymentForm =
         // const plan_id = plans[0]?.id
         const plan_qty = quantity
         const plan     = plans[0]
-        // const planObject = await (await SubscriptionPlanHandlers.create(dataProvider)).getById(plan_id)
         const total = plan?.price_per_person * Number(plan_qty)
 
         const generated_url = generateToken({
