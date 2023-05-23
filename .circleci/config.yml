@@ -29,7 +29,7 @@ jobs:
       - run:
           name: Deploy Over SSH
           command: |
-            ssh ubuntu@15.188.175.214 << EOF
+            ssh ubuntu@15.188.175.214 \<< EOF
               cd apps/backend/
               git pull
               npm install
