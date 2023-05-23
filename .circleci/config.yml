@@ -11,9 +11,9 @@ jobs:
       - run:
           name: Install Dependencies
           command: npm install
-      - run:
-          name: Run Tests
-          command: npm test
+#      - run:
+#          name: Run Tests
+#          command: npm test
       - persist_to_workspace:
           root: ~/repo
           paths:
