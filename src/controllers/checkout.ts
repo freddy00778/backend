@@ -10,7 +10,7 @@ import SubscriptionPlanHandlers from "../data/subscriptionPlan/SubscriptionPlanH
 // import {sendEmails} from "./teams";
 import {SendEmail} from "../services/email/SendEmail";
 import axios from "axios";
-import * as bcrypt from "bcrypt";
+// import * as bcrypt from "bcrypt";
 import LicenseHandlers from "../data/license/LicenseHandlers";
 import {futureDate} from "../utils/dateUtil";
 import qs from 'querystring';
@@ -300,8 +300,9 @@ export const validateAndRedirectToSetup = catchErrors(async (req, res) => {
 });
 
 export const addAdministrator = catchErrors(async (req, res) => {
-        const { name, email, password, company, captchaValue, token } = req.body;
+        const { name, email, captchaValue, token } = req.body;
 
+        console.log("log", `email - ${email}`)
     // try{
          if (!captchaValue) {return res.status(400).json({ error: 'reCAPTCHA value is missing' });}
 
@@ -310,9 +311,12 @@ export const addAdministrator = catchErrors(async (req, res) => {
 
          const data = await DataProvider.create()
          const userHandlers = await UserHandlers.create(data);
-         const existingUserObject = await userHandlers.getUser({email})
 
-        if (existingUserObject){
+    const existingUserObject = await userHandlers.getUser({email})
+
+    console.log("log", `email 2 - ${email}`)
+
+    if (existingUserObject){
             return res.status(409).json({ error: 'This email is already exists!' });
         }
 
@@ -330,7 +334,7 @@ export const addAdministrator = catchErrors(async (req, res) => {
             return res.status(400).json({ error: 'Invalid reCAPTCHA' });
         }
 
-        const user = await createUser(name, email, password, company);
+        const user = await createUser(email, name);
 
         await (await InvoiceHandlers.create(data)).update(transactionId, {
             admin_setup: true
@@ -551,10 +555,9 @@ const verifyCaptcha = async (captchaValue) => {
     return response.data.success;
 };
 
-const createUser = async (name, email, password, company) => {
-
-    const hashedPassword = password ??  bcrypt.hashSync(password, 10);
-    const fullNameArray = name?.split(" ");
+const createUser = async ( email, company) => {
+    // const hashedPassword = password ??  bcrypt.hashSync(password, 10);
+    // const fullNameArray = name?.split(" ");
     const data = await DataProvider.create();
     const userHandlers = await UserHandlers.create(data);
     const existingUserObject = await userHandlers.getUser({email})
@@ -562,9 +565,6 @@ const createUser = async (name, email, password, company) => {
     if (!existingUserObject){
         return await userHandlers.create({
             email,
-            firstName: fullNameArray[0],
-            lastName: fullNameArray.length > 1 ? fullNameArray[1] : "",
-            password: password?? hashedPassword,
             additionalDetails: {
                 company: company
             }
