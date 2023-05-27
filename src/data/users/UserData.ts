@@ -55,7 +55,7 @@ export interface GetInput {
 }
 
 export const getUser = (users: () => QueryBuilder) => async (input: GetInput) => {
-  return (await users().select().where(input).first())
+  return  users().select().where(input).first()
 }
 
 export const getUserByEmail = (query: () => QueryBuilder) => async (input: GetInput) => {
