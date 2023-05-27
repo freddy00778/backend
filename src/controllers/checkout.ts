@@ -552,7 +552,8 @@ const verifyCaptcha = async (captchaValue) => {
 };
 
 const createUser = async (name, email, password, company) => {
-    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    const hashedPassword = password ??  bcrypt.hashSync(password, 10);
     const fullNameArray = name?.split(" ");
     const data = await DataProvider.create();
     const userHandlers = await UserHandlers.create(data);
@@ -563,7 +564,7 @@ const createUser = async (name, email, password, company) => {
             email,
             firstName: fullNameArray[0],
             lastName: fullNameArray.length > 1 ? fullNameArray[1] : "",
-            password: hashedPassword,
+            password: password?? hashedPassword,
             additionalDetails: {
                 company: company
             }
