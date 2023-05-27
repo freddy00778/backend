@@ -202,9 +202,7 @@ export const login =
         const passwordMatch = emailExists && await bcrypt.compare(password, userObject.password)
 
         if (userObject && passwordMatch) {
-            const subscription = await (await SubscriptionHandlers.create(data)).get({administrator: userObject?.id})
-            const currentDate = Date.now();
-            const expiresAt = new Date(subscription.expires_at).getTime()
+
             const token = generateToken(userObject)
             const jsonInfo = {
                 ...userObject,
@@ -216,6 +214,10 @@ export const login =
                     ...jsonInfo
                 });
             }
+
+            const subscription = await (await SubscriptionHandlers.create(data)).get({administrator: userObject?.id})
+            const currentDate = Date.now();
+            const expiresAt = new Date(subscription.expires_at).getTime()
 
             // if ( userObject.subscription_plan == null || userObject.expires_at == null || expiresAt < currentDate ){
             //     return res.status(403).send("License has expired");
