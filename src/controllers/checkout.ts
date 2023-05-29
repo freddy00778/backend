@@ -348,7 +348,7 @@ export const addAdministrator = catchErrors(async (req, res) => {
         })
 
         const sendMail = SendEmail()
-        sendMail.confirmationEmailToAdmin(email, 0)
+        sendMail.confirmationEmailToAdmin(email, 0, user?.id)
 
         return res.json({ success: true });
 

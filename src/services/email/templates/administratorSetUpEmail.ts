@@ -1,4 +1,4 @@
- export const administratorSetUpEmail = (no_of_purchases: number) => {
+ export const administratorSetUpEmail = (no_of_purchases: number, user_id) => {
     return `
 <html xmlns="http://www.w3.org/1999/xhtml">
 
@@ -13,7 +13,7 @@
     set up and administer individual&nbsp;users&rsquo; access to the online&nbsp;game, check&nbsp;and track&nbsp;the&nbsp;registration&nbsp;status&nbsp;and progress&nbsp;of&nbsp;each&nbsp;user, and view&nbsp;your license usage and account information.&nbsp;If&nbsp;the&nbsp;licenses&nbsp;will be distributed across multiple teams, you will be able to assign a&nbsp;Team&nbsp;Coordinator,&nbsp;per team,&nbsp;to&nbsp;assist with&nbsp;the&nbsp;coordination of&nbsp;completion.&nbsp;&nbsp;</p>
 </div>
 <div>
-    <p>To access the Administrator Console and set up your password, simply click the&nbsp;following&nbsp;link:&nbsp;<br> https://changeverveacademy.com</p>
+    <p>To access the Administrator Console and set up your password, simply click the&nbsp;following&nbsp;link:&nbsp;<br> https://changeverveacademy.com/invitee-register/${user_id}</p>
 </div>
 <div>
     <p>PLEASE NOTE THE FOLLOWING IMPORTANT INFORMATION:&nbsp;</p>

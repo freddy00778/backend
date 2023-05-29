@@ -1,7 +1,7 @@
 
 interface EmailService {
     sendWelcomeEmail: (recipientEmail: string, content: string, sign_off: string, expiry: string, user: string, license_id, id ) => Promise<void>;
-    confirmationEmailToAdmin: (adminEmail: string, no_of_purchases: number) => Promise<void>;
+    confirmationEmailToAdmin: (adminEmail: string, no_of_purchases: number, user_id) => Promise<void>;
     confirmationEmailToCoordinator: (coordinatorEmail: string, team_name: string, expiry: string, administrator_email: string) => Promise<void>;
     sendUserReminderEmail: (recipientEmail: string, content: string, id: string, sign_off: string, expiry: string, user:string, license_id: string) => Promise<void>;
     sendCompletedResults: (recipientEmail: string, user_id: string, game_id: string, license_id: string) => Promise<void>;

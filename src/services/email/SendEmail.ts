@@ -108,8 +108,9 @@ export function SendEmail(): EmailService {
             return queueEmail({to: recipientEmail, email_content: template, subject: `Registration for the ChangeVerve Change Management Game`, queue_name: `send-welcome-email`})
         },
 
-        async confirmationEmailToAdmin(adminEmail: string, no_of_purchases): Promise<void> {
-            const template = administratorSetUpEmail(no_of_purchases)
+        async confirmationEmailToAdmin(adminEmail: string, no_of_purchases, user_id): Promise<void> {
+
+            const template = administratorSetUpEmail(no_of_purchases, user_id)
             return queueEmail({to: adminEmail, email_content: template,
                 subject: `Confirmation of team configuration for the ChangeVerve Change Management Game `,
                 queue_name: `send-admin-setup-email`})
