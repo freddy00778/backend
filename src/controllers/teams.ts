@@ -139,7 +139,7 @@ export const addMembers =
                 await (await TeamUserHandlers.create(data)).create(teamUserBody)
             }
 
-            // if(userLicenseExist && !userLicenseExist.isInvited ){
+            if(userLicenseExist && !userLicenseExist.isInvited ){
                 await emailService.sendWelcomeEmail(
                     email,
                     content,
@@ -150,8 +150,8 @@ export const addMembers =
                     userLicenseObject.id)
             }
 
-            // await userLicenseHandler.update({id: userLicenseObject?.id, isInvited: true})
-        // }
+            await userLicenseHandler.update({id: userLicenseObject?.id, isInvited: true})
+        }
 
         res.respond({
         });
