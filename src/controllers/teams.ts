@@ -133,7 +133,7 @@ export const addMembers =
                 user: insertedUser.id,
                 team: team_id
             }
-            // console.log("team body", teamUserBody)
+
             const teamUserExists = await (await  TeamUserHandlers.create(data)).getAll(teamUserBody)
             if (teamUserExists?.length < 1){
                 await (await TeamUserHandlers.create(data)).create(teamUserBody)
@@ -150,7 +150,7 @@ export const addMembers =
                     userLicenseObject.id)
             }
 
-            await userLicenseHandler.update({id: userLicenseObject?.id, isInvited: true, invitationMessage: content})
+            await userLicenseHandler.update({id: userLicenseObject?.id, isInvited: true, invitation_message: content})
         }
 
         res.respond({
@@ -346,7 +346,9 @@ export const resendEmail = catchErrors(async (req, res) =>{
     // const scheduled = null
     // const scheduled_at = null
     const user_license_id = userLicense?.id
+
     const emailService = SendEmail()
+
 
     emailService.sendWelcomeEmail(to, email_content, sign_off, licenseObject?.expiry, user_id, license_id, user_license_id)
 

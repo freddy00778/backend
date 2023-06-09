@@ -20,6 +20,7 @@ import {Database} from "../../config";
 import UserLicenseHandlers from "../../data/userLicense/UserLicenseHandlers";
 import * as bcrypt from "bcrypt";
 import UserHandlers from "../../data/users/UserHandlers";
+import {SendEmail} from "../../services/email/SendEmail";
 export const attachPublicRoutes = (app: any): void => {
 
   app.post('/api/v1/auth/login', users.login)
@@ -215,6 +216,23 @@ export const attachPublicRoutes = (app: any): void => {
    }
 
     res.send("OK")
+
+  })
+
+  // @ts-ignore
+  app.get("/send-email", async(req, res) => {
+    const emailService = SendEmail()
+
+    await emailService.sendWelcomeEmail(
+        "lazaridesvanessa@gmail.com",
+        "This the Alpha Launch and the purpose of this test is to ensure system functionality and refine minor issues that may be identified.",
+        "",
+        "2023-11-11 18:05:45.888+00",
+        "288754e2-1eb7-4e97-8cf5-8ec2e66b7b75",
+        "c0dead2c-92cc-4597-8f22-bbebaa2bc565",
+        "de004f81-041f-4fda-a782-77c911ea4658")
+
+    return res.send("OK")
 
   })
 
