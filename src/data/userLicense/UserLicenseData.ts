@@ -13,6 +13,7 @@ export interface UserLicense {
   isInvited: boolean
   isStarted: boolean
   completed: boolean
+  invitationMessage: string
 }
 
 export interface Data {
@@ -35,6 +36,7 @@ export interface GetInput {
   isInvited?: boolean
   isStarted?: boolean
   completed?: boolean
+  invitationMessage?: string
 }
 
 export interface GetListInput extends Omit<UserLicense, 'id'> {}

@@ -126,7 +126,7 @@ export const addMembers =
 
             const userLicenseExist = await userLicenseHandler.get({license: team?.license, user: insertedUser?.id})
 
-            const userLicenseBody = { license: team?.license, user: insertedUser.id, isInvited: true}
+            const userLicenseBody = { license: team?.license, user: insertedUser.id}
             const userLicenseObject = userLicenseExist ? userLicenseExist :  await userLicenseHandler.create(userLicenseBody)
 
             const teamUserBody = {
@@ -150,7 +150,7 @@ export const addMembers =
                     userLicenseObject.id)
             }
 
-            await userLicenseHandler.update({id: userLicenseObject?.id, isInvited: true})
+            await userLicenseHandler.update({id: userLicenseObject?.id, isInvited: true, invitationMessage: content})
         }
 
         res.respond({
@@ -341,28 +341,12 @@ export const resendEmail = catchErrors(async (req, res) =>{
     const team: Team = await  (await TeamHandlers.create(data)).getById({id: team_id})
     const to = user?.email
     // const subject = ""
-    const email_content = team?.email_message
+    const email_content = userLicense?.invitationMessage
     const sign_off = team?.sign_off
     // const scheduled = null
     // const scheduled_at = null
     const user_license_id = userLicense?.id
-
     const emailService = SendEmail()
-
-    // EmailService.queueEmail(
-    //     {
-    //         to,
-    //         subject,
-    //         email_content,
-    //         sign_off,
-    //         scheduled,
-    //         scheduled_at,
-    //         user_license_id,
-    //         interval: null,
-    //         expiry: licenseObject?.expiry,
-    //         user: user_id,
-    //         license: license_id
-    //     })
 
     emailService.sendWelcomeEmail(to, email_content, sign_off, licenseObject?.expiry, user_id, license_id, user_license_id)
 
