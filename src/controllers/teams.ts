@@ -114,9 +114,11 @@ export const addMembers =
 
         const data = await DataProvider.create()
         const team  = await (await TeamHandlers.create(data)).getById({id : team_id})
+        // @ts-ignore
         const licenseObject = await (await LicenseHandlers.create(data)).getById(team?.license)
         const userHandler   = await UserHandlers.create(data)
         const userLicenseHandler   = await UserLicenseHandlers.create(data)
+        // @ts-ignore
         const emailService = SendEmail()
         for(const email of emails){
             const emailExists    =   await userHandler.getEmail(email)
@@ -140,14 +142,14 @@ export const addMembers =
             }
 
             if(userLicenseExist && !userLicenseExist.isInvited ){
-                await emailService.sendWelcomeEmail(
-                    email,
-                    content,
-                    "",
-                    licenseObject?.expiry,
-                    insertedUser.id,
-                    team?.license,
-                    userLicenseObject.id)
+            //     await emailService.sendWelcomeEmail(
+            //         email,
+            //         content,
+            //         "",
+            //         licenseObject?.expiry,
+            //         insertedUser.id,
+            //         team?.license,
+            //         userLicenseObject.id)
             }
 
             await userLicenseHandler.update({id: userLicenseObject?.id, isInvited: true, invitation_message: content})
