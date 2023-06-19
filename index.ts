@@ -15,7 +15,7 @@ import {SendEmail} from "./src/services/email/SendEmail";
 import {processUserReminderEmail} from "./src/services/email/reminders/processUserReminderEmail";
 //@ts-ignore
 import {processAllCompletedNotificationsToAdministrator} from "./src/services/email/reminders/processAllCompletedNotificationsToAdministrator";
-import {processCoordinatorReminderEmail} from "./src/services/email/reminders/processCoordinatorReminderEmail";
+// import {processCoordinatorReminderEmail} from "./src/services/email/reminders/processCoordinatorReminderEmail";
 import crypto from 'crypto';
 import cookieParser from "cookie-parser";
 
@@ -33,6 +33,7 @@ const initializeExpress = async () => {
         next();
     });
 
+    // @ts-ignore
     const data = await DataProvider.create()
     // @ts-ignore
     const sendMail = SendEmail()
@@ -40,8 +41,8 @@ const initializeExpress = async () => {
     // Schedule the task to run every Sunday at 12:00 AM
     NodeCron.schedule('30 09 * * 0', async () => {
         console.log('This task runs every Sunday at 12:00 AM!');
-        await processCoordinatorReminderEmail(data,sendMail)
-        await processUserReminderEmail(data, sendMail)
+        // await processCoordinatorReminderEmail(data,sendMail)
+        // await processUserReminderEmail(data, sendMail)
 
     });
 
