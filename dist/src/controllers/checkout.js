@@ -47,7 +47,7 @@ const SubscriptionPlanHandlers_1 = __importDefault(require("../data/subscription
 // import {sendEmails} from "./teams";
 const SendEmail_1 = require("../services/email/SendEmail");
 const axios_1 = __importDefault(require("axios"));
-const bcrypt = __importStar(require("bcrypt"));
+// import * as bcrypt from "bcrypt";
 const LicenseHandlers_1 = __importDefault(require("../data/license/LicenseHandlers"));
 const dateUtil_1 = require("../utils/dateUtil");
 const querystring_1 = __importDefault(require("querystring"));
@@ -56,7 +56,8 @@ const InvoiceItemHandlers_1 = __importDefault(require("../data/invoiceItem/Invoi
 const SubscriptionHandlers_1 = __importDefault(require("../data/subscription/SubscriptionHandlers"));
 const merchantId = '21013235';
 const merchantKey = 'zcx350nyoedit';
-const returnUrl = 'https://changeverveacademy.com/transaction-status';
+// const returnUrl = 'https://changeverveacademy.com/transaction-status';
+const returnUrl = 'https://store.changeverveacademy.com';
 const cancelUrl = 'https://changeverveacademy.com/cancel-url';
 const notifyUrl = 'https://backend.changeverveacademy.com/notify';
 const itemName = 'Change Management Game';
@@ -93,7 +94,8 @@ exports.processPaymentForm = (0, errors_1.catchErrors)((req, res) => __awaiter(v
     // if (!csrfToken || !csrfHeader || csrfToken !== csrfHeader) {
     //     return res.status(403).json({ message: 'Invalid CSRF token' });
     // }
-    const { items, email, quantity, } = req.body;
+    const { email, quantity } = req.body;
+    console.log("Req body", req.body);
     if (!(email)) {
         return res.status(400).send("All inputs are required!");
     }
@@ -110,7 +112,11 @@ exports.processPaymentForm = (0, errors_1.catchErrors)((req, res) => __awaiter(v
         total: (plan === null || plan === void 0 ? void 0 : plan.price_per_person) * Number(plan_qty),
         transaction_number: orderNo,
         url: `/card-payments/${orderNo}`,
-        items
+        items: [
+            {
+                id: plan === null || plan === void 0 ? void 0 : plan.id,
+            }
+        ]
     }, '72h');
     yield (yield InvoiceHandlers_1.default.create(dataProvider)).create({
         transaction_number: orderNo,
@@ -281,7 +287,8 @@ exports.validateAndRedirectToSetup = (0, errors_1.catchErrors)((req, res) => __a
 }));
 exports.addAdministrator = (0, errors_1.catchErrors)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
-    const { name, email, password, company, captchaValue, token } = req.body;
+    const { name, email, captchaValue, token } = req.body;
+    console.log("log", `email - ${email}`);
     // try{
     if (!captchaValue) {
         return res.status(400).json({ error: 'reCAPTCHA value is missing' });
@@ -291,6 +298,7 @@ exports.addAdministrator = (0, errors_1.catchErrors)((req, res) => __awaiter(voi
     const data = yield data_1.DataProvider.create();
     const userHandlers = yield UserHandlers_1.default.create(data);
     const existingUserObject = yield userHandlers.getUser({ email });
+    console.log("log", `email 2 - ${email}`);
     if (existingUserObject) {
         return res.status(409).json({ error: 'This email is already exists!' });
     }
@@ -304,7 +312,7 @@ exports.addAdministrator = (0, errors_1.catchErrors)((req, res) => __awaiter(voi
     if (!isCaptchaValid) {
         return res.status(400).json({ error: 'Invalid reCAPTCHA' });
     }
-    const user = yield createUser(name, email, password, company);
+    const user = yield createUser(email, name);
     yield (yield InvoiceHandlers_1.default.create(data)).update(transactionId, {
         admin_setup: true
     });
@@ -315,7 +323,7 @@ exports.addAdministrator = (0, errors_1.catchErrors)((req, res) => __awaiter(voi
         administrator: user === null || user === void 0 ? void 0 : user.id
     });
     const sendMail = (0, SendEmail_1.SendEmail)();
-    sendMail.confirmationEmailToAdmin(email, 0);
+    sendMail.confirmationEmailToAdmin(email, 0, user === null || user === void 0 ? void 0 : user.id);
     return res.json({ success: true });
     // }catch (e) {
     return res.json({ success: false });
@@ -473,18 +481,15 @@ const verifyCaptcha = (captchaValue) => __awaiter(void 0, void 0, void 0, functi
     const response = yield axios_1.default.post(verificationURL);
     return response.data.success;
 });
-const createUser = (name, email, password, company) => __awaiter(void 0, void 0, void 0, function* () {
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    const fullNameArray = name === null || name === void 0 ? void 0 : name.split(" ");
+const createUser = (email, company) => __awaiter(void 0, void 0, void 0, function* () {
+    // const hashedPassword = password ??  bcrypt.hashSync(password, 10);
+    // const fullNameArray = name?.split(" ");
     const data = yield data_1.DataProvider.create();
     const userHandlers = yield UserHandlers_1.default.create(data);
     const existingUserObject = yield userHandlers.getUser({ email });
     if (!existingUserObject) {
         return yield userHandlers.create({
             email,
-            firstName: fullNameArray[0],
-            lastName: fullNameArray.length > 1 ? fullNameArray[1] : "",
-            password: hashedPassword,
             additionalDetails: {
                 company: company
             }
