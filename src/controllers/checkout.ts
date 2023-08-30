@@ -70,7 +70,11 @@ export const processPaymentForm =
         //     return res.status(403).json({ message: 'Invalid CSRF token' });
         // }
 
-        const { email, quantity } = req.body;
+        // const { email, quantity } = req.body;
+        const email = req.body['your-email'];
+        const quantity = req.body['numberoflicenses'];
+
+        console.log("Req body", req.body)
         if (!(email)) {
             return res.status(400).send("All inputs are required!");
         }
