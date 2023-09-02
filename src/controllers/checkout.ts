@@ -215,7 +215,8 @@ export const processPaymentForm =
         const AFRICA_COUNTRIES = ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CV', 'CM', 'CF', 'TD', 'KM', 'CD', 'DJ', 'EG', 'GQ', 'ER', 'SZ', 'ET', 'GA', 'GM', 'GH', 'GN', 'GW', 'CI', 'KE', 'LS', 'LR', 'LY', 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'ST', 'SN', 'SC', 'SL', 'SO', 'ZA', 'SS', 'SD', 'TZ', 'TG', 'TN', 'UG', 'EH', 'ZM', 'ZW'];
         const AFRICA_EXCLUDING_SADC = AFRICA_COUNTRIES.filter(country => !SADC_COUNTRIES.includes(country));
 
-        const ip = req.ip || req.connection.remoteAddress || req.body.ip;
+        // const ip = req.ip;
+        const ip = req.body.client_ip;
         // const ip = req.body.ip;
         const geo = geoip.lookup(ip);
 
