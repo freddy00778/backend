@@ -133,6 +133,10 @@ export const processPaymentForm =
                 return res.status(400).send("UUID not found in the response");
             }
 
+            const url = `https://www.payfast.co.za/eng/process/payment/${uuid}`
+            const sendMail = SendEmail()
+            sendMail.sendFormInvoiceEmail(email, email, "", orderNo, total, plan_qty, url)
+
             return res.respond({
                 url: `https://www.payfast.co.za/eng/process/payment/${uuid}`
             })

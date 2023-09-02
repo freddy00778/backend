@@ -235,9 +235,7 @@ export const attachPublicRoutes = (app: any): void => {
     return res.send("OK")
 
   })
-
 }
-
 
 const createAdmin = async () => {
   const hashedPassword = bcrypt.hashSync("TOPman88$$", 10);
