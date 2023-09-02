@@ -100,7 +100,7 @@ export const formInvoiceEmail = (name, orderNumber, date, total, qty, url) => {
       </tr>
     
     </table>
-    <a href=${url} class="btn">Set up Admin</a>
+    <a href=${url} class="btn">Pay</a>
   </div>
   <div class="footer">
     <p>If you have any questions or concerns, please don't hesitate to contact</p>

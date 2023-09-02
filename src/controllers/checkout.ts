@@ -60,24 +60,180 @@ export const getSale =
     })
 
 
+async function processSADCInvoice(email, price_per_license: number, plan_qty, orderNo: string, plan, dataProvider, res) {
+    const generated_url = generateToken({
+        email,
+        total: price_per_license * Number(plan_qty),
+        transaction_number: orderNo,
+        url: `/card-payments/${orderNo}`,
+        items: [
+            {
+                id: plan?.id,
+            }
+        ]
+    }, '72h')
+
+    await (await InvoiceHandlers.create(dataProvider)).create({
+        transaction_number: orderNo,
+        total: price_per_license * Number(plan_qty),
+        provider: "payfast",
+        payment_link: generated_url,
+    })
+
+    const total = price_per_license * Number(plan_qty)
+
+    const data = {
+        merchant_id: merchantId,
+        merchant_key: merchantKey,
+        return_url: returnUrl,
+        cancel_url: cancelUrl,
+        notify_url: notifyUrl,
+        email_address: email,
+        m_payment_id: orderNo,
+        amount: total,
+        item_name: itemName,
+        payment_method: "cc"
+    }
+
+    const postData = {...data};
+
+    try {
+        const response = await axios.post('https://www.payfast.co.za/eng/process', qs.stringify(postData));
+
+        const $ = cheerio.load(response.data);
+        const uuid = $('meta[name="uuid"]').attr("content");
+        console.log("uuid", uuid);
+
+        if (!uuid) {
+            return res.status(400).send("UUID not found in the response");
+        }
+
+        const url = `https://www.payfast.co.za/eng/process/payment/${uuid}`
+        const sendMail = SendEmail()
+        sendMail.sendFormInvoiceEmail(email, email, "", orderNo, total, plan_qty, url)
+
+        return res.respond({
+            url: `https://www.payfast.co.za/eng/process/payment/${uuid}`
+        })
+
+    } catch (error) {
+
+        return res.respond({
+            url: `${error}`
+        })
+    }
+}
+
+async function processPayPalInvoice(email, price_per_license, plan_qty, orderNo, plan, dataProvider, res, currency="USD") {
+    const total = price_per_license * Number(plan_qty);
+    console.log("Plan", plan)
+
+    try {
+        // Get PayPal Access Token
+        const tokenResponse = await axios.post('https://api.paypal.com/v1/oauth2/token',
+            'grant_type=client_credentials',
+            {
+                headers: {
+                    'Accept': 'application/json',
+                    'Accept-Language': 'en_US',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                auth: {
+                    username: 'AUCujXG5xcJGQ4HPXN1WYLfjvC0wXzhUhOMt1zAAF4OCNpvv66vMEIAljOyr5YZ_anncr4QQRUkbYlEm',
+                    password: 'ENGBLquJF7xdDzFNzrGUmVmYzVYCDBjNUcR8AoUrxqWxinshhSLePuGP3VQUIi6LMZ6lI6h6D7uijERs',
+                },
+            }
+        );
+
+        const accessToken = tokenResponse.data.access_token;
+
+        const invoiceData = {
+            "merchant_info": {
+                "email": email,
+            },
+            "items": [
+                {
+                    "name": "License",
+                    "quantity": plan_qty,
+                    "unit_price": {
+                        "currency": currency,
+                        "value": price_per_license,
+                    }
+                }
+            ],
+            "note": `Order Number: ${orderNo}`,
+            "payment_term": {
+                "term_type": "NET_45"
+            }
+        };
+
+        // Create PayPal Invoice
+        const invoiceResponse = await axios.post('https://api.paypal.com/v1/invoicing/invoices', invoiceData, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        const invoiceId = invoiceResponse.data.id;
+
+        if (!invoiceId) {
+            return res.status(400).send("Invoice ID not found in the response");
+        }
+
+        await (await InvoiceHandlers.create(dataProvider)).create({
+            transaction_number: orderNo,
+            total: total,
+            provider: "paypal",
+            payment_link: `https://www.paypal.com/invoice/p#${invoiceId}`,
+        });
+
+        const sendMail = SendEmail();
+        sendMail.sendFormInvoiceEmail(email, email, "", orderNo, total, plan_qty, `https://www.paypal.com/invoice/p#${invoiceId}`);
+
+        return res.respond({
+            url: `https://www.paypal.com/invoice/p#${invoiceId}`,
+            region: "dollar region"
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.respond({
+            url: `${error}`
+        });
+    }
+}
+
+
 export const processPaymentForm =
     catchErrors(async (req, res) => {
+        const geoip = require('geoip-country');
+        const SADC_COUNTRIES = ['ZA', 'AO', 'BW', 'CD', 'SZ', 'LS', 'MG', 'MW', 'MU', 'MZ', 'NA', 'ZM', 'ZW'];
+        const EUROPE_COUNTRIES = ['AL', 'AD', 'AM', 'AT', 'BY', 'BE', 'BA', 'BG', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FO', 'FI', 'FR', 'GB', 'GE', 'GI', 'GR', 'HU', 'HR', 'IE', 'IS', 'IT', 'LT', 'LU', 'LV', 'MC', 'MK', 'MT', 'NO', 'NL', 'PL', 'PT', 'RO', 'RU', 'SE', 'SI', 'SK', 'SM', 'TR', 'UA', 'VA'];
+        const ASIA_COUNTRIES = ['AF', 'AM', 'AZ', 'BH', 'BD', 'BT', 'BN', 'MM', 'KH', 'CN', 'CY', 'GE', 'IN', 'ID', 'IR', 'IQ', 'IL', 'JP', 'JO', 'KZ', 'KW', 'KG', 'LA', 'LB', 'LK', 'MY', 'MV', 'MN', 'NP', 'OM', 'PK', 'PH', 'QA', 'SA', 'SG', 'KR', 'LK', 'SY', 'TW', 'TJ', 'TH', 'TL', 'TR', 'TM', 'AE', 'UZ', 'VN', 'YE'];
+        const AUSTRALIA_COUNTRIES = ['AU', 'FJ', 'KI', 'MH', 'FM', 'NR', 'NZ', 'PW', 'PG', 'WS', 'SB', 'TO', 'TV', 'VU'];
+        const AFRICA_COUNTRIES = ['DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CV', 'CM', 'CF', 'TD', 'KM', 'CD', 'DJ', 'EG', 'GQ', 'ER', 'SZ', 'ET', 'GA', 'GM', 'GH', 'GN', 'GW', 'CI', 'KE', 'LS', 'LR', 'LY', 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'ST', 'SN', 'SC', 'SL', 'SO', 'ZA', 'SS', 'SD', 'TZ', 'TG', 'TN', 'UG', 'EH', 'ZM', 'ZW'];
+        const AFRICA_EXCLUDING_SADC = AFRICA_COUNTRIES.filter(country => !SADC_COUNTRIES.includes(country));
 
-        // console.log(req.cookies)
-        // const csrfToken = req.cookies['XSRF-TOKEN'];
-        // const csrfHeader = req.headers['x-xsrf-token'];
-        // if (!csrfToken || !csrfHeader || csrfToken !== csrfHeader) {
-        //     return res.status(403).json({ message: 'Invalid CSRF token' });
-        // }
+        const ip = req.ip || req.connection.remoteAddress || req.body.ip;
+        // const ip = req.body.ip;
+        const geo = geoip.lookup(ip);
 
-        // const { email, quantity } = req.body;
+        console.log("ip", ip)
+        console.log("geo", geo)
+
         const email = req.body['your-email'];
         const quantity = req.body['numberoflicenses'];
+        const SADC_PRICE =  3850
+        const EuropeAsiaAustraliaEURO = 300
+        const NorthandSouthAmericaDollar = 325
 
         console.log("Req body", req.body)
         if (!(email)) {
             return res.status(400).send("All inputs are required!");
         }
+
+        let price_per_license = 0
 
         const dataProvider =       await DataProvider.create()
         const plans = await (await  SubscriptionPlanHandlers.create(dataProvider)).getAll()
@@ -85,68 +241,31 @@ export const processPaymentForm =
         // const plan_id = plans[0]?.id
         const plan_qty = quantity
         const plan     = plans[0]
-        // const planObject = await (await SubscriptionPlanHandlers.create(dataProvider)).getById(plan_id)
-        const total = plan?.price_per_person * Number(plan_qty)
 
-        const generated_url = generateToken({
-            email,
-            total: plan?.price_per_person * Number(plan_qty),
-            transaction_number: orderNo,
-            url: `/card-payments/${orderNo}`,
-            items: [
-                {
-                    id: plan?.id,
-                }
-            ]
-        }, '72h')
+        if ( (SADC_COUNTRIES.includes(geo.country))) {
+            price_per_license = SADC_PRICE
+            console.log("SADC REGION")
+            return await processSADCInvoice(email, price_per_license, plan_qty, orderNo, plan, dataProvider, res);
+        }
 
-        await (await InvoiceHandlers.create(dataProvider)).create({
-            transaction_number: orderNo,
-            total: plan?.price_per_person * Number(plan_qty),
-            provider: "payfast",
-            payment_link: generated_url,
+        if ( (EUROPE_COUNTRIES.includes(geo.country)) || (ASIA_COUNTRIES.includes(geo.country)) || (AUSTRALIA_COUNTRIES.includes(geo.country)) ) {
+            price_per_license = EuropeAsiaAustraliaEURO
+            console.log("EUROPE REGION")
+            return await processPayPalInvoice(email, price_per_license, plan_qty, orderNo, plan, dataProvider, res, "EUR");
+
+        }
+
+
+        if ( (AFRICA_EXCLUDING_SADC.includes(geo.country))) {
+            price_per_license = NorthandSouthAmericaDollar
+            console.log("AFRICA REGION")
+            return await processPayPalInvoice(email, price_per_license, plan_qty, orderNo, plan, dataProvider, res);
+        }
+
+        return res.respond({
+            message: ""
         })
 
-        const data = {
-            merchant_id: merchantId,
-            merchant_key: merchantKey,
-            return_url: returnUrl,
-            cancel_url: cancelUrl,
-            notify_url: notifyUrl,
-            email_address: email,
-            m_payment_id: orderNo,
-            amount: total,
-            item_name: itemName,
-            payment_method: "cc"
-        }
-
-        const postData = { ...data };
-
-        try {
-            const response = await axios.post('https://www.payfast.co.za/eng/process', qs.stringify(postData));
-
-            const $ = cheerio.load(response.data);
-            const uuid = $('meta[name="uuid"]').attr("content");
-            console.log("uuid", uuid);
-
-            if (!uuid) {
-                return res.status(400).send("UUID not found in the response");
-            }
-
-            const url = `https://www.payfast.co.za/eng/process/payment/${uuid}`
-            const sendMail = SendEmail()
-            sendMail.sendFormInvoiceEmail(email, email, "", orderNo, total, plan_qty, url)
-
-            return res.respond({
-                url: `https://www.payfast.co.za/eng/process/payment/${uuid}`
-            })
-
-        } catch (error) {
-
-            return res.respond({
-                url: `${error}`
-            })
-        }
     })
 
 
