@@ -3,7 +3,6 @@ import {DataProvider} from "../../../data";
 import UserHandlers from "../../../data/users/UserHandlers";
 import TeamHandlers from "../../../data/teams/TeamHandlers";
 import LicenseHandlers from "../../../data/license/LicenseHandlers";
-// import LicenseHandlers from "../../../data/license/LicenseHandlers";
 
 
 export const resultsTemplate = async ({user_id, game_id, license_id}) => {

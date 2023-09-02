@@ -10,6 +10,7 @@ interface EmailService {
     sendReminderEmailToCoordinator: (recipientEmail: string, emails: string[], expiry: string, administratorEmail: string) => Promise<void>;
     sendAllCompletedEmails: (recipientEmail: string, compnay_name: string) => Promise<void>;
     sendInvoiceEmail: (recipientEmail: string, name:string, date:string, orderNumber:string, total:number, qty:number, token: string) => Promise<void>;
+    sendFormInvoiceEmail: (recipientEmail: string, name:string, date:string, orderNumber:string, total:number, qty:number, url: string) => Promise<void>;
     coordinatorRegistrationEmail: (coordinatorEmail: string, team_name, expiry, user_id) => Promise<void>;
     sendPaymentLink: (email: string, plan: string, total: number, transaction_number: string, payment_link: string) => Promise<void>;
 

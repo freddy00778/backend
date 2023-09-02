@@ -11,6 +11,7 @@ import {userReminderEmail} from "./templates/userReminderEmail";
 import {completedEmailToCoordinator} from "./templates/completedEmailToCoordinator";
 import {coordinatorRegistrationEmail} from "./templates/coordinatorRegistrationEmail";
 import {paymentLink} from "./templates/paymentLink";
+import {formInvoiceEmail} from "./templates/formInvoiceEmail";
 
 export function SendEmail(): EmailService {
 
@@ -207,6 +208,16 @@ export function SendEmail(): EmailService {
                 to: recipientEmail,
                 subject: "Invoice",
                 queue_name: "invoice-emails",
+                email_content: template
+            })
+        },
+
+        sendFormInvoiceEmail(recipientEmail: string, name:string, date:string, orderNumber:string, total:number, qty:number, url: string): Promise<void> {
+            const template = formInvoiceEmail(name, orderNumber,date, total, qty, url )
+            return queueEmail({
+                to: recipientEmail,
+                subject: "Invoice",
+                queue_name: "form-invoice-emails",
                 email_content: template
             })
         },
