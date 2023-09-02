@@ -22,6 +22,7 @@ import cookieParser from "cookie-parser";
 const initializeExpress = async () => {
     const app = express();
     app.use(cookieParser())
+    app.set('trust proxy', true);
 
     // @ts-ignore
     app.use((req, res, next) => {
